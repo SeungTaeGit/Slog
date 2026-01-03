@@ -17,6 +17,10 @@ public class PostRequest {
 
     private String status;
 
+    private String thumbnailUrl;
+
+    private String categoryName;
+
     public Post toEntity() {
         return Post.builder()
                 .title(this.title)

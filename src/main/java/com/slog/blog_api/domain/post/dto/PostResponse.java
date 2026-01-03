@@ -12,6 +12,7 @@ public class PostResponse {
     private final String content;
     private final Long viewCount;
     private final LocalDateTime createdAt;
+    private final String categoryName;
 
     public PostResponse(Post post) {
         this.id = post.getId();
@@ -19,5 +20,6 @@ public class PostResponse {
         this.content = post.getContent();
         this.viewCount = post.getViewCount();
         this.createdAt = post.getCreatedAt();
+        this.categoryName = (post.getCategory() != null) ? post.getCategory().getName() : null;
     }
 }

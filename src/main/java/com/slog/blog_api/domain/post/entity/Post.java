@@ -1,5 +1,6 @@
 package com.slog.blog_api.domain.post.entity;
 
+import com.slog.blog_api.domain.category.entity.Category;
 import com.slog.blog_api.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -27,23 +28,28 @@ public class Post extends BaseTimeEntity {
 
     private Long viewCount;
 
-    // 공개 상태 (PUBLIC, PRIVATE, DRAFT) -> Enum으로 관리하면 더 좋아 (일단 String)
     @Column(nullable = false)
     private String status;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
+
     @Builder
-    public Post(String title, String content, String thumbnailUrl, String status) {
+    public Post(String title, String content, String thumbnailUrl, String status, Category category) {
         this.title = title;
         this.content = content;
         this.thumbnailUrl = thumbnailUrl;
         this.status = status;
+        this.category = category;
         this.viewCount = 0L;
     }
 
-    public void update(String title, String content, String thumbnailUrl, String status) {
+    public void update(String title, String content, String thumbnailUrl, String status, Category category) {
         this.title = title;
         this.content = content;
         this.thumbnailUrl = thumbnailUrl;
         this.status = status;
+        this.category = category;
     }
 }
