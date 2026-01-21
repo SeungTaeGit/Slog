@@ -1,0 +1,73 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.5.9'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.slog'
+version = '0.0.1-SNAPSHOT'
+description = 'Demo project for Spring Boot'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+    // 1. Web & Validation
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // 2. Database & JPA
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    runtimeOnly 'com.mysql:mysql-connector-j'
+
+    // 3. Security (관리자 로그인용)
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // 4. Utility (Lombok, etc)
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // 5. QueryDSL (복잡한 검색용)
+    implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+    annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
+    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+
+    // JWT (JSON Web Token) 라이브러리 - 0.11.5 버전 
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+    // Test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+}
+
+// QClass가 생성될 위치를 지정
+def querydslDir = "$buildDir/generated/querydsl"
+
+// 자바 컴파일(빌드) 할 때, QClass를 저 위치에 만들라고 명령
+tasks.withType(JavaCompile) {
+    options.getGeneratedSourceOutputDirectory().set(file(querydslDir))
+}
+
+// 소스 코드 폴더에 생성된 QClass 폴더를 추가 (IntelliJ가 인식하도록)
+sourceSets {
+    main.java.srcDirs += [ querydslDir ]
+}
+
+// clean(청소) 할 때 저 폴더도 같이 지워줘
+clean.doLast {
+    file(querydslDir).deleteDir()
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
