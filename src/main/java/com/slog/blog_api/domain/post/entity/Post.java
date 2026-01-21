@@ -28,15 +28,16 @@ public class Post extends BaseTimeEntity {
 
     private Long viewCount;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status;
+    private PostStatus status = PostStatus.PUBLIC;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
 
     @Builder
-    public Post(String title, String content, String thumbnailUrl, String status, Category category) {
+    public Post(String title, String content, String thumbnailUrl, PostStatus status, Category category) {
         this.title = title;
         this.content = content;
         this.thumbnailUrl = thumbnailUrl;
@@ -45,11 +46,10 @@ public class Post extends BaseTimeEntity {
         this.viewCount = 0L;
     }
 
-    public void update(String title, String content, String thumbnailUrl, String status, Category category) {
+    public void update(String title, String content, Category category, PostStatus status) {
         this.title = title;
         this.content = content;
-        this.thumbnailUrl = thumbnailUrl;
-        this.status = status;
         this.category = category;
+        this.status = status;
     }
 }

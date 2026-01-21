@@ -33,7 +33,7 @@ public class QPost extends EntityPathBase<Post> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final StringPath status = createString("status");
+    public final EnumPath<PostStatus> status = createEnum("status", PostStatus.class);
 
     public final StringPath thumbnailUrl = createString("thumbnailUrl");
 

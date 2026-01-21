@@ -1,6 +1,7 @@
 package com.slog.blog_api.domain.post.dto;
 
 import com.slog.blog_api.domain.post.entity.Post;
+import com.slog.blog_api.domain.post.entity.PostStatus;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,7 +16,7 @@ public class PostRequest {
     @NotBlank(message = "본문은 필수입니다.")
     private String content;
 
-    private String status;
+    private PostStatus status;
 
     private String thumbnailUrl;
 
