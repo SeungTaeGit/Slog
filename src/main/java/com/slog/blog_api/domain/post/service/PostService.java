@@ -8,6 +8,9 @@ import com.slog.blog_api.domain.post.dto.PostResponse;
 import com.slog.blog_api.domain.post.entity.Post;
 import com.slog.blog_api.domain.post.entity.PostStatus;
 import com.slog.blog_api.domain.post.repository.PostRepository;
+import com.slog.blog_api.domain.tag.entity.PostTag;
+import com.slog.blog_api.domain.tag.entity.Tag;
+import com.slog.blog_api.domain.tag.repository.TagRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +23,7 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final CategoryRepository categoryRepository;
+    private final TagRepository tagRepository;
 
     @Transactional
     public Long writePost(PostCreateRequest request) {
@@ -35,6 +39,22 @@ public class PostService {
                 .category(category)
                 .status(PostStatus.PUBLIC)
                 .build();
+
+        if (request.getTags() != null) {
+            for (String tagName : request.getTags()) {
+                Tag tag = tagRepository.findByName(tagName)
+                        .orElseGet(() -> tagRepository.save(Tag.builder()
+                                .name(tagName)
+                                .build()));
+
+                PostTag postTag = PostTag.builder()
+                        .post(post)
+                        .tag(tag)
+                        .build();
+
+                post.addPostTag(postTag);
+            }
+        }
 
         postRepository.save(post);
         return post.getId();
@@ -64,6 +84,24 @@ public class PostService {
                         .build()));
 
         post.update(request.getTitle(), request.getContent(), category, request.getStatus());
+
+        if (request.getTags() != null) {
+            post.getPostTags().clear();
+
+            for (String tagName : request.getTags()) {
+                Tag tag = tagRepository.findByName(tagName)
+                        .orElseGet(() -> tagRepository.save(Tag.builder()
+                                .name(tagName)
+                                .build()));
+
+                PostTag postTag = PostTag.builder()
+                        .post(post)
+                        .tag(tag)
+                        .build();
+
+                post.addPostTag(postTag);
+            }
+        }
     }
 
     @Transactional

@@ -7,6 +7,9 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import com.slog.blog_api.domain.tag.entity.PostTag;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -36,6 +39,9 @@ public class Post extends BaseTimeEntity {
     @JoinColumn(name = "category_id")
     private Category category;
 
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostTag> postTags = new ArrayList<>();
+
     @Builder
     public Post(String title, String content, String thumbnailUrl, PostStatus status, Category category) {
         this.title = title;
@@ -51,5 +57,9 @@ public class Post extends BaseTimeEntity {
         this.content = content;
         this.category = category;
         this.status = status;
+    }
+
+    public void addPostTag(PostTag postTag) {
+        this.postTags.add(postTag);
     }
 }

@@ -1,9 +1,12 @@
 package com.slog.blog_api.domain.post.dto;
 
 import com.slog.blog_api.domain.post.entity.Post;
+import com.slog.blog_api.domain.tag.entity.PostTag;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 public class PostResponse {
@@ -13,6 +16,7 @@ public class PostResponse {
     private final Long viewCount;
     private final LocalDateTime createdAt;
     private final String categoryName;
+    private final List<String> tags;
 
     public PostResponse(Post post) {
         this.id = post.getId();
@@ -21,5 +25,8 @@ public class PostResponse {
         this.viewCount = post.getViewCount();
         this.createdAt = post.getCreatedAt();
         this.categoryName = (post.getCategory() != null) ? post.getCategory().getName() : null;
+        this.tags = post.getPostTags().stream()
+                .map(postTag -> postTag.getTag().getName())
+                .collect(Collectors.toList());
     }
 }

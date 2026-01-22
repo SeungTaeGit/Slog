@@ -33,6 +33,8 @@ public class QPost extends EntityPathBase<Post> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
+    public final ListPath<com.slog.blog_api.domain.tag.entity.PostTag, com.slog.blog_api.domain.tag.entity.QPostTag> postTags = this.<com.slog.blog_api.domain.tag.entity.PostTag, com.slog.blog_api.domain.tag.entity.QPostTag>createList("postTags", com.slog.blog_api.domain.tag.entity.PostTag.class, com.slog.blog_api.domain.tag.entity.QPostTag.class, PathInits.DIRECT2);
+
     public final EnumPath<PostStatus> status = createEnum("status", PostStatus.class);
 
     public final StringPath thumbnailUrl = createString("thumbnailUrl");

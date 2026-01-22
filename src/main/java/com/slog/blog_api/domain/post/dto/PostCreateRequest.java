@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -16,6 +18,8 @@ public class PostCreateRequest {
     @NotBlank(message = "내용은 필수입니다.")
     private String content;
     private String categoryName;
+
+    private List<String> tags;
 
     public PostCreateRequest(String title, String content, String categoryName) {
         this.title = title;
