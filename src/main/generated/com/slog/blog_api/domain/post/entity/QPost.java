@@ -35,6 +35,8 @@ public class QPost extends EntityPathBase<Post> {
 
     public final ListPath<com.slog.blog_api.domain.tag.entity.PostTag, com.slog.blog_api.domain.tag.entity.QPostTag> postTags = this.<com.slog.blog_api.domain.tag.entity.PostTag, com.slog.blog_api.domain.tag.entity.QPostTag>createList("postTags", com.slog.blog_api.domain.tag.entity.PostTag.class, com.slog.blog_api.domain.tag.entity.QPostTag.class, PathInits.DIRECT2);
 
+    public final com.slog.blog_api.domain.series.entity.QSeries series;
+
     public final EnumPath<PostStatus> status = createEnum("status", PostStatus.class);
 
     public final StringPath thumbnailUrl = createString("thumbnailUrl");
@@ -65,6 +67,7 @@ public class QPost extends EntityPathBase<Post> {
     public QPost(Class<? extends Post> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.category = inits.isInitialized("category") ? new com.slog.blog_api.domain.category.entity.QCategory(forProperty("category")) : null;
+        this.series = inits.isInitialized("series") ? new com.slog.blog_api.domain.series.entity.QSeries(forProperty("series")) : null;
     }
 
 }

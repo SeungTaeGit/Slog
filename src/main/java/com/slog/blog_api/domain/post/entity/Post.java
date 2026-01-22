@@ -1,6 +1,7 @@
 package com.slog.blog_api.domain.post.entity;
 
 import com.slog.blog_api.domain.category.entity.Category;
+import com.slog.blog_api.domain.series.entity.Series;
 import com.slog.blog_api.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -42,21 +43,26 @@ public class Post extends BaseTimeEntity {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostTag> postTags = new ArrayList<>();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "series_id")
+    private Series series;
+
     @Builder
-    public Post(String title, String content, String thumbnailUrl, PostStatus status, Category category) {
+    public Post(String title, String content, String thumbnailUrl, Category category, PostStatus status, Series series) {
         this.title = title;
         this.content = content;
         this.thumbnailUrl = thumbnailUrl;
-        this.status = status;
         this.category = category;
-        this.viewCount = 0L;
+        this.status = status;
+        this.series = series;
     }
 
-    public void update(String title, String content, Category category, PostStatus status) {
+    public void update(String title, String content, Category category, PostStatus status, Series series) {
         this.title = title;
         this.content = content;
         this.category = category;
         this.status = status;
+        this.series = series;
     }
 
     public void addPostTag(PostTag postTag) {

@@ -11,9 +11,16 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 public class PostEditRequest {
+
     private String title;
+
     private String content;
+
     private String categoryName;
+
     private PostStatus status;
+
     private List<String> tags;
+
+    private String seriesName;
 }

@@ -21,6 +21,8 @@ public class PostCreateRequest {
 
     private List<String> tags;
 
+    private String seriesName;
+
     public PostCreateRequest(String title, String content, String categoryName) {
         this.title = title;
         this.content = content;

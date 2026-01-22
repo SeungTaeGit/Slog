@@ -35,9 +35,11 @@ public class PostController {
     public ApiResponse<Page<PostResponse>> getList(
             @PageableDefault(size = 10) Pageable pageable,
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) String categoryName
+            @RequestParam(required = false) String categoryName,
+            @RequestParam(required = false) String tagName,
+            @RequestParam(required = false) String seriesName
     ) {
-        Page<PostResponse> postList = postService.getPostList(pageable, keyword, categoryName);
+        Page<PostResponse> postList = postService.getPostList(pageable, keyword, categoryName, tagName, seriesName);
         return ApiResponse.ok(postList);
     }
 

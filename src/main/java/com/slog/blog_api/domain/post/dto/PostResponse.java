@@ -17,6 +17,7 @@ public class PostResponse {
     private final LocalDateTime createdAt;
     private final String categoryName;
     private final List<String> tags;
+    private final String seriesName;
 
     public PostResponse(Post post) {
         this.id = post.getId();
@@ -28,5 +29,6 @@ public class PostResponse {
         this.tags = post.getPostTags().stream()
                 .map(postTag -> postTag.getTag().getName())
                 .collect(Collectors.toList());
+        this.seriesName = post.getSeries() != null ? post.getSeries().getName() : null;
     }
 }

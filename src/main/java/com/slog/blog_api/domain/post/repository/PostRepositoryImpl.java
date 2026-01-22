@@ -12,6 +12,9 @@ import java.util.List;
 
 import static com.slog.blog_api.domain.post.entity.QPost.post;
 import static com.slog.blog_api.domain.category.entity.QCategory.category;
+import static com.slog.blog_api.domain.series.entity.QSeries.series;
+import static com.slog.blog_api.domain.tag.entity.QTag.tag;
+import static com.slog.blog_api.domain.tag.entity.QPostTag.postTag;
 
 @RequiredArgsConstructor
 public class PostRepositoryImpl implements PostRepositoryCustom {
@@ -19,26 +22,37 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public Page<Post> search(String keyword, String categoryName, Pageable pageable) {
+    public Page<Post> search(String keyword, String categoryName, String tagName, String seriesName, Pageable pageable) { // 파라미터 변경됨
 
         List<Post> content = jpaQueryFactory
                 .selectFrom(post)
                 .leftJoin(post.category, category).fetchJoin()
+                .leftJoin(post.series, series).fetchJoin()
+                .leftJoin(post.postTags, postTag)
+                .leftJoin(postTag.tag, tag)
                 .where(
                         containsKeyword(keyword),
-                        eqCategory(categoryName)
+                        eqCategory(categoryName),
+                        eqSeries(seriesName),
+                        eqTag(tagName)
                 )
+                .distinct()
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .orderBy(post.id.desc())
                 .fetch();
 
         Long count = jpaQueryFactory
-                .select(post.count())
+                .select(post.countDistinct())
                 .from(post)
+                .leftJoin(post.postTags, postTag)
+                .leftJoin(postTag.tag, tag)
+                .leftJoin(post.series, series)
                 .where(
                         containsKeyword(keyword),
-                        eqCategory(categoryName)
+                        eqCategory(categoryName),
+                        eqSeries(seriesName),
+                        eqTag(tagName)
                 )
                 .fetchOne();
 
@@ -57,5 +71,19 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
             return null;
         }
         return category.name.eq(categoryName);
+    }
+
+    private BooleanExpression eqSeries(String seriesName) {
+        if (seriesName == null || seriesName.isEmpty()) {
+            return null;
+        }
+        return series.name.eq(seriesName);
+    }
+
+    private BooleanExpression eqTag(String tagName) {
+        if (tagName == null || tagName.isEmpty()) {
+            return null;
+        }
+        return tag.name.eq(tagName);
     }
 }

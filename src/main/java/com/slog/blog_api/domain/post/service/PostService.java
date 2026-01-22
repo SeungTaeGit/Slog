@@ -8,6 +8,8 @@ import com.slog.blog_api.domain.post.dto.PostResponse;
 import com.slog.blog_api.domain.post.entity.Post;
 import com.slog.blog_api.domain.post.entity.PostStatus;
 import com.slog.blog_api.domain.post.repository.PostRepository;
+import com.slog.blog_api.domain.series.entity.Series;
+import com.slog.blog_api.domain.series.repository.SeriesRepository;
 import com.slog.blog_api.domain.tag.entity.PostTag;
 import com.slog.blog_api.domain.tag.entity.Tag;
 import com.slog.blog_api.domain.tag.repository.TagRepository;
@@ -24,6 +26,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final CategoryRepository categoryRepository;
     private final TagRepository tagRepository;
+    private final SeriesRepository seriesRepository;
 
     @Transactional
     public Long writePost(PostCreateRequest request) {
@@ -32,11 +35,14 @@ public class PostService {
                         .name(request.getCategoryName())
                         .build()));
 
+        Series series = getSeries(request.getSeriesName());
+
         Post post = Post.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
                 .thumbnailUrl("https://image.com/default.png")
                 .category(category)
+                .series(series)
                 .status(PostStatus.PUBLIC)
                 .build();
 
@@ -68,8 +74,8 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public Page<PostResponse> getPostList(Pageable pageable, String keyword, String categoryName) {
-        return postRepository.search(keyword, categoryName, pageable)
+    public Page<PostResponse> getPostList(Pageable pageable, String keyword, String categoryName, String tagName, String seriesName) {
+        return postRepository.search(keyword, categoryName, tagName, seriesName, pageable)
                 .map(PostResponse::new);
     }
 
@@ -83,7 +89,13 @@ public class PostService {
                         .name(request.getCategoryName())
                         .build()));
 
-        post.update(request.getTitle(), request.getContent(), category, request.getStatus());
+        Series series = getSeries(request.getSeriesName());
+
+        String title = request.getTitle() != null ? request.getTitle() : post.getTitle();
+        String content = request.getContent() != null ? request.getContent() : post.getContent();
+        PostStatus status = request.getStatus() != null ? request.getStatus() : post.getStatus();
+
+        post.update(title, content, category, status, series);
 
         if (request.getTags() != null) {
             post.getPostTags().clear();
@@ -109,5 +121,15 @@ public class PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
         postRepository.delete(post);
+    }
+
+    private Series getSeries(String seriesName) {
+        if (seriesName == null || seriesName.isEmpty()) {
+            return null;
+        }
+        return seriesRepository.findByName(seriesName)
+                .orElseGet(() -> seriesRepository.save(Series.builder()
+                        .name(seriesName)
+                        .build()));
     }
 }
