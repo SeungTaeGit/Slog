@@ -1,8 +1,12 @@
 package com.slog.blog_api.domain.post.repository;
 
+import com.slog.blog_api.domain.post.dto.SidebarDto;
 import com.slog.blog_api.domain.post.entity.Post;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.querydsl.core.types.Projections;
+import lombok.RequiredArgsConstructor;
+import com.slog.blog_api.domain.post.entity.PostStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -85,5 +89,42 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
             return null;
         }
         return tag.name.eq(tagName);
+    }
+
+    @Override
+    public List<SidebarDto.CategoryCount> getCategoryCounts() {
+        return jpaQueryFactory
+                .select(Projections.constructor(SidebarDto.CategoryCount.class,
+                        category.name,
+                        post.count()))
+                .from(post)
+                .join(post.category, category)
+                .where(post.status.eq(PostStatus.PUBLIC))
+                .groupBy(category.name)
+                .fetch();
+    }
+
+    @Override
+    public List<SidebarDto.SeriesCount> getSeriesCounts() {
+        return jpaQueryFactory
+                .select(Projections.constructor(SidebarDto.SeriesCount.class,
+                        series.name,
+                        post.count()))
+                .from(post)
+                .join(post.series, series)
+                .where(post.status.eq(PostStatus.PUBLIC))
+                .groupBy(series.name)
+                .fetch();
+    }
+
+    @Override
+    public List<String> getPublicTagNames() {
+        return jpaQueryFactory
+                .selectDistinct(tag.name)
+                .from(postTag)
+                .join(postTag.tag, tag)
+                .join(postTag.post, post)
+                .where(post.status.eq(PostStatus.PUBLIC))
+                .fetch();
     }
 }
