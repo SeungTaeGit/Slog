@@ -1,18 +1,26 @@
 package com.slog.blog_api.domain.post.repository;
 
-import com.slog.blog_api.domain.post.dto.SidebarDto;
-import com.slog.blog_api.domain.post.entity.Post;
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.PathBuilder;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.querydsl.core.types.Projections;
-import lombok.RequiredArgsConstructor;
-import com.slog.blog_api.domain.post.entity.PostStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.support.PageableExecutionUtils;
+import org.springframework.data.domain.Sort;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import com.slog.blog_api.domain.post.dto.PostResponse;
+import com.slog.blog_api.domain.post.dto.PostSearchCondition;
+import com.slog.blog_api.domain.post.dto.SidebarDto;
+import com.slog.blog_api.domain.post.entity.Post;
+import com.slog.blog_api.domain.post.entity.PostStatus;
 
 import static com.slog.blog_api.domain.post.entity.QPost.post;
 import static com.slog.blog_api.domain.category.entity.QCategory.category;
@@ -23,80 +31,59 @@ import static com.slog.blog_api.domain.tag.entity.QPostTag.postTag;
 @RequiredArgsConstructor
 public class PostRepositoryImpl implements PostRepositoryCustom {
 
-    private final JPAQueryFactory jpaQueryFactory;
+    private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<Post> search(String keyword, String categoryName, String tagName, String seriesName, Pageable pageable) { // 파라미터 변경됨
+    public Page<PostResponse> search(PostSearchCondition condition, Pageable pageable) {
 
-        List<Post> content = jpaQueryFactory
+        JPAQuery<Post> query = queryFactory
                 .selectFrom(post)
                 .leftJoin(post.category, category).fetchJoin()
                 .leftJoin(post.series, series).fetchJoin()
-                .leftJoin(post.postTags, postTag)
+                .leftJoin(postTag).on(postTag.post.eq(post))
                 .leftJoin(postTag.tag, tag)
                 .where(
-                        containsKeyword(keyword),
-                        eqCategory(categoryName),
-                        eqSeries(seriesName),
-                        eqTag(tagName)
+                        isPublic(),
+                        keywordContains(condition.getKeyword()),
+                        categoryEq(condition.getCategoryName()),
+                        seriesEq(condition.getSeriesName()),
+                        tagEq(condition.getTagName())
                 )
-                .distinct()
+                .groupBy(post.id);
+
+        applySorting(query, pageable);
+
+        List<Post> posts = query
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .orderBy(post.id.desc())
                 .fetch();
 
-        Long count = jpaQueryFactory
-                .select(post.countDistinct())
+        Long total = queryFactory
+                .select(post.count())
                 .from(post)
-                .leftJoin(post.postTags, postTag)
+                .leftJoin(postTag).on(postTag.post.eq(post))
                 .leftJoin(postTag.tag, tag)
-                .leftJoin(post.series, series)
                 .where(
-                        containsKeyword(keyword),
-                        eqCategory(categoryName),
-                        eqSeries(seriesName),
-                        eqTag(tagName)
+                        isPublic(),
+                        keywordContains(condition.getKeyword()),
+                        categoryEq(condition.getCategoryName()),
+                        seriesEq(condition.getSeriesName()),
+                        tagEq(condition.getTagName())
                 )
                 .fetchOne();
 
-        return PageableExecutionUtils.getPage(content, pageable, () -> count == null ? 0 : count);
-    }
+        List<PostResponse> content = posts.stream()
+                .map(PostResponse::new)
+                .collect(Collectors.toList());
 
-    private BooleanExpression containsKeyword(String keyword) {
-        if (keyword == null || keyword.isEmpty()) {
-            return null;
-        }
-        return post.title.contains(keyword).or(post.content.contains(keyword));
-    }
-
-    private BooleanExpression eqCategory(String categoryName) {
-        if (categoryName == null || categoryName.isEmpty()) {
-            return null;
-        }
-        return category.name.eq(categoryName);
-    }
-
-    private BooleanExpression eqSeries(String seriesName) {
-        if (seriesName == null || seriesName.isEmpty()) {
-            return null;
-        }
-        return series.name.eq(seriesName);
-    }
-
-    private BooleanExpression eqTag(String tagName) {
-        if (tagName == null || tagName.isEmpty()) {
-            return null;
-        }
-        return tag.name.eq(tagName);
+        return new PageImpl<>(content, pageable, total != null ? total : 0);
     }
 
     @Override
     public List<SidebarDto.CategoryCount> getCategoryCounts() {
-        return jpaQueryFactory
-                .select(Projections.constructor(SidebarDto.CategoryCount.class,
-                        category.name,
-                        post.count()))
+        return queryFactory
+                .select(com.querydsl.core.types.Projections.constructor(SidebarDto.CategoryCount.class,
+                        category.name, post.count()))
                 .from(post)
                 .join(post.category, category)
                 .where(post.status.eq(PostStatus.PUBLIC))
@@ -106,10 +93,9 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
     @Override
     public List<SidebarDto.SeriesCount> getSeriesCounts() {
-        return jpaQueryFactory
-                .select(Projections.constructor(SidebarDto.SeriesCount.class,
-                        series.name,
-                        post.count()))
+        return queryFactory
+                .select(com.querydsl.core.types.Projections.constructor(SidebarDto.SeriesCount.class,
+                        series.name, post.count()))
                 .from(post)
                 .join(post.series, series)
                 .where(post.status.eq(PostStatus.PUBLIC))
@@ -119,12 +105,56 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
     @Override
     public List<String> getPublicTagNames() {
-        return jpaQueryFactory
+        return queryFactory
                 .selectDistinct(tag.name)
-                .from(postTag)
+                .from(postTag) // PostTag 테이블 기준
                 .join(postTag.tag, tag)
                 .join(postTag.post, post)
                 .where(post.status.eq(PostStatus.PUBLIC))
                 .fetch();
+    }
+
+    private void applySorting(JPAQuery<?> query, Pageable pageable) {
+        if (pageable.getSort().isEmpty()) {
+            query.orderBy(post.id.desc());
+            return;
+        }
+        for (Sort.Order order : pageable.getSort()) {
+            Order direction = order.isAscending() ? Order.ASC : Order.DESC;
+            switch (order.getProperty()) {
+                case "views": query.orderBy(new OrderSpecifier<>(direction, post.views)); break;
+                case "createdAt": query.orderBy(new OrderSpecifier<>(direction, post.createdAt)); break;
+                case "title": query.orderBy(new OrderSpecifier<>(direction, post.title)); break;
+                default: query.orderBy(new OrderSpecifier<>(direction, post.id));
+            }
+        }
+    }
+
+    private BooleanExpression isPublic() {
+        return post.status.eq(PostStatus.PUBLIC);
+    }
+
+    private BooleanExpression keywordContains(String keyword) {
+        return StringUtils.hasText(keyword)
+                ? post.title.containsIgnoreCase(keyword).or(post.content.containsIgnoreCase(keyword))
+                : null;
+    }
+
+    private BooleanExpression categoryEq(String categoryName) {
+        return StringUtils.hasText(categoryName)
+                ? post.category.name.eq(categoryName)
+                : null;
+    }
+
+    private BooleanExpression seriesEq(String seriesName) {
+        return StringUtils.hasText(seriesName)
+                ? post.series.name.eq(seriesName)
+                : null;
+    }
+
+    private BooleanExpression tagEq(String tagName) {
+        return StringUtils.hasText(tagName)
+                ? tag.name.eq(tagName)
+                : null;
     }
 }

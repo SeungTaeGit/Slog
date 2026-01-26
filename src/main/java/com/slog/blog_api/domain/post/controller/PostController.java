@@ -3,12 +3,14 @@ package com.slog.blog_api.domain.post.controller;
 import com.slog.blog_api.domain.post.dto.PostCreateRequest;
 import com.slog.blog_api.domain.post.dto.PostEditRequest;
 import com.slog.blog_api.domain.post.dto.PostResponse;
+import com.slog.blog_api.domain.post.dto.PostSearchCondition;
 import com.slog.blog_api.domain.post.service.PostService;
 import com.slog.blog_api.global.dto.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,15 +34,11 @@ public class PostController {
     }
 
     @GetMapping
-    public ApiResponse<Page<PostResponse>> getList(
-            @PageableDefault(size = 10) Pageable pageable,
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) String categoryName,
-            @RequestParam(required = false) String tagName,
-            @RequestParam(required = false) String seriesName
+    public ApiResponse<Page<PostResponse>> getPostList(
+            @ModelAttribute PostSearchCondition condition,
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Page<PostResponse> postList = postService.getPostList(pageable, keyword, categoryName, tagName, seriesName);
-        return ApiResponse.ok(postList);
+        return ApiResponse.ok(postService.getPostList(condition, pageable));
     }
 
     @PatchMapping("/{postId}")

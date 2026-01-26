@@ -25,7 +25,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String token = jwtTokenProvider.createToken(authentication);
         log.info("📢 구글 로그인 성공. JWT 토큰 발급 완료: {}", token);
 
-        String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:8080/")
+        String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:3000/auth/callback")
                 .queryParam("token", token)
                 .build().toUriString();
 

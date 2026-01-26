@@ -30,7 +30,8 @@ public class Post extends BaseTimeEntity {
 
     private String thumbnailUrl;
 
-    private Long viewCount;
+    @Column(columnDefinition = "integer default 0", nullable = false)
+    private Long views = 0L;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

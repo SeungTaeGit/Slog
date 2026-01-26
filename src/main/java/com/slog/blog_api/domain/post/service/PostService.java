@@ -5,6 +5,7 @@ import com.slog.blog_api.domain.category.repository.CategoryRepository;
 import com.slog.blog_api.domain.post.dto.PostCreateRequest;
 import com.slog.blog_api.domain.post.dto.PostEditRequest;
 import com.slog.blog_api.domain.post.dto.PostResponse;
+import com.slog.blog_api.domain.post.dto.PostSearchCondition;
 import com.slog.blog_api.domain.post.entity.Post;
 import com.slog.blog_api.domain.post.entity.PostStatus;
 import com.slog.blog_api.domain.post.repository.PostRepository;
@@ -73,10 +74,8 @@ public class PostService {
         return new PostResponse(post);
     }
 
-    @Transactional(readOnly = true)
-    public Page<PostResponse> getPostList(Pageable pageable, String keyword, String categoryName, String tagName, String seriesName) {
-        return postRepository.search(keyword, categoryName, tagName, seriesName, pageable)
-                .map(PostResponse::new);
+    public Page<PostResponse> getPostList(PostSearchCondition condition, Pageable pageable) {
+        return postRepository.search(condition, pageable);
     }
 
     @Transactional

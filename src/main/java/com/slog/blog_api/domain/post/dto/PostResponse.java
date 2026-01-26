@@ -13,7 +13,7 @@ public class PostResponse {
     private final Long id;
     private final String title;
     private final String content;
-    private final Long viewCount;
+    private final Long views;
     private final LocalDateTime createdAt;
     private final String categoryName;
     private final List<String> tags;
@@ -23,7 +23,7 @@ public class PostResponse {
         this.id = post.getId();
         this.title = post.getTitle();
         this.content = post.getContent();
-        this.viewCount = post.getViewCount();
+        this.views = post.getViews();
         this.createdAt = post.getCreatedAt();
         this.categoryName = (post.getCategory() != null) ? post.getCategory().getName() : null;
         this.tags = post.getPostTags().stream()
