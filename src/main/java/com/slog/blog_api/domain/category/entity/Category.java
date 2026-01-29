@@ -1,13 +1,15 @@
 package com.slog.blog_api.domain.category.entity;
 
+import com.slog.blog_api.domain.post.entity.Post;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Category {
 
@@ -17,6 +19,9 @@ public class Category {
 
     @Column(nullable = false, unique = true)
     private String name;
+
+    @OneToMany(mappedBy = "category")
+    private List<Post> posts = new ArrayList<>();
 
     @Builder
     public Category(String name) {

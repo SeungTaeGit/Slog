@@ -15,3 +15,12 @@ spring:
 logging:
   level:
     org.springframework.security: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics, loggers, beans
+  endpoint:
+    health:
+      show-details: always

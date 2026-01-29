@@ -19,34 +19,37 @@ repositories {
 }
 
 dependencies {
-    // 1. Web & Validation
+    // Web & Validation
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
-    // 2. Database & JPA
+    // Database & JPA
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     runtimeOnly 'com.mysql:mysql-connector-j'
 
-    // 3. Security (관리자 로그인용)
+    // Security (관리자 로그인용)
     implementation 'org.springframework.boot:spring-boot-starter-security'
 
-    // 4. Utility (Lombok, etc)
+    // Utility (Lombok, etc)
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
-    // 5. QueryDSL (복잡한 검색용)
+    // QueryDSL (복잡한 검색용)
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
     annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
     annotationProcessor "jakarta.annotation:jakarta.annotation-api"
     annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 
-    // JWT (JSON Web Token) 라이브러리 - 0.11.5 버전
+    // JWT
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
-    // OAuth2 Client (구글 로그인용)
+    // OAuth2 Client
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+    // Spring Boot Actuator
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

@@ -3,9 +3,13 @@ package com.slog.blog_api.domain.post.repository;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.slog.blog_api.domain.post.dto.PostResponse;
+import com.slog.blog_api.domain.post.dto.PostSearchCondition;
+import com.slog.blog_api.domain.post.dto.SidebarDto;
+import com.slog.blog_api.domain.post.entity.Post;
+import com.slog.blog_api.domain.post.entity.PostStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -16,17 +20,11 @@ import org.springframework.util.StringUtils;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.slog.blog_api.domain.post.dto.PostResponse;
-import com.slog.blog_api.domain.post.dto.PostSearchCondition;
-import com.slog.blog_api.domain.post.dto.SidebarDto;
-import com.slog.blog_api.domain.post.entity.Post;
-import com.slog.blog_api.domain.post.entity.PostStatus;
-
-import static com.slog.blog_api.domain.post.entity.QPost.post;
 import static com.slog.blog_api.domain.category.entity.QCategory.category;
+import static com.slog.blog_api.domain.post.entity.QPost.post;
 import static com.slog.blog_api.domain.series.entity.QSeries.series;
-import static com.slog.blog_api.domain.tag.entity.QTag.tag;
 import static com.slog.blog_api.domain.tag.entity.QPostTag.postTag;
+import static com.slog.blog_api.domain.tag.entity.QTag.tag;
 
 @RequiredArgsConstructor
 public class PostRepositoryImpl implements PostRepositoryCustom {
@@ -43,7 +41,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .leftJoin(postTag).on(postTag.post.eq(post))
                 .leftJoin(postTag.tag, tag)
                 .where(
-                        isPublic(),
+                        statusEq(condition.getStatus()),
                         keywordContains(condition.getKeyword()),
                         categoryEq(condition.getCategoryName()),
                         seriesEq(condition.getSeriesName()),
@@ -64,7 +62,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .leftJoin(postTag).on(postTag.post.eq(post))
                 .leftJoin(postTag.tag, tag)
                 .where(
-                        isPublic(),
+                        statusEq(condition.getStatus()),
                         keywordContains(condition.getKeyword()),
                         categoryEq(condition.getCategoryName()),
                         seriesEq(condition.getSeriesName()),
@@ -134,6 +132,10 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         return post.status.eq(PostStatus.PUBLIC);
     }
 
+    private BooleanExpression statusEq(PostStatus status) {
+        return status != null ? post.status.eq(status) : null;
+    }
+
     private BooleanExpression keywordContains(String keyword) {
         return StringUtils.hasText(keyword)
                 ? post.title.containsIgnoreCase(keyword).or(post.content.containsIgnoreCase(keyword))
@@ -156,5 +158,34 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         return StringUtils.hasText(tagName)
                 ? tag.name.eq(tagName)
                 : null;
+    }
+
+    @Override
+    public long getTotalViews() {
+        Long sum = queryFactory
+                .select(post.views.sum())
+                .from(post)
+                .fetchOne();
+        return sum != null ? sum : 0L;
+    }
+
+    @Override
+    public long countDistinctCategories() {
+        return queryFactory
+                .select(post.category.name)
+                .from(post)
+                .where(post.category.name.isNotNull())
+                .groupBy(post.category.name)
+                .fetch().size();
+    }
+
+    @Override
+    public long countDistinctSeries() {
+        return queryFactory
+                .select(post.series.name)
+                .from(post)
+                .where(post.series.name.isNotNull())
+                .groupBy(post.series.name)
+                .fetch().size();
     }
 }

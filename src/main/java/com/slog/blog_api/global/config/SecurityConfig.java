@@ -47,9 +47,13 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
 
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/actuator/**").hasRole("ADMIN")
+
                         .requestMatchers("/oauth2/**", "/login/**", "/error", "/favicon.ico").permitAll()
 
                         .requestMatchers(HttpMethod.GET, "/api/v1/posts/**", "/api/v1/categories/**", "/api/v1/tags", "/api/v1/series").permitAll()
+
+                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
 
                         .anyRequest().authenticated()
                 )

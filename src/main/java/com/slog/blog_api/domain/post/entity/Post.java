@@ -2,18 +2,17 @@ package com.slog.blog_api.domain.post.entity;
 
 import com.slog.blog_api.domain.category.entity.Category;
 import com.slog.blog_api.domain.series.entity.Series;
+import com.slog.blog_api.domain.tag.entity.PostTag;
 import com.slog.blog_api.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import com.slog.blog_api.domain.tag.entity.PostTag;
+import lombok.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Post extends BaseTimeEntity {
 

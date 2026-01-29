@@ -4,8 +4,9 @@ import com.slog.blog_api.domain.post.dto.PostCreateRequest;
 import com.slog.blog_api.domain.post.dto.PostEditRequest;
 import com.slog.blog_api.domain.post.dto.PostResponse;
 import com.slog.blog_api.domain.post.dto.PostSearchCondition;
+import com.slog.blog_api.domain.post.entity.PostStatus;
 import com.slog.blog_api.domain.post.service.PostService;
-import com.slog.blog_api.global.dto.ApiResponse;
+import com.slog.blog_api.global.common.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,13 +25,13 @@ public class PostController {
     @PostMapping
     public ApiResponse<Long> write(@Valid @RequestBody PostCreateRequest request) {
         Long postId = postService.writePost(request);
-        return ApiResponse.ok(postId);
+        return ApiResponse.success(postId);
     }
 
     @GetMapping("/{postId}")
     public ApiResponse<PostResponse> get(@PathVariable Long postId) {
         PostResponse response = postService.getPost(postId);
-        return ApiResponse.ok(response);
+        return ApiResponse.success(response);
     }
 
     @GetMapping
@@ -38,18 +39,20 @@ public class PostController {
             @ModelAttribute PostSearchCondition condition,
             @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return ApiResponse.ok(postService.getPostList(condition, pageable));
+        condition.setStatus(PostStatus.PUBLIC);
+
+        return ApiResponse.success(postService.getPostList(condition, pageable));
     }
 
     @PatchMapping("/{postId}")
     public ApiResponse<String> edit(@PathVariable Long postId, @Valid @RequestBody PostEditRequest request) {
         postService.editPost(postId, request);
-        return ApiResponse.ok("수정 성공");
+        return ApiResponse.success("수정 성공");
     }
 
     @DeleteMapping("/{postId}")
     public ApiResponse<String> delete(@PathVariable Long postId) {
         postService.deletePost(postId);
-        return ApiResponse.ok("삭제 성공");
+        return ApiResponse.success("삭제 성공");
     }
 }

@@ -15,17 +15,14 @@ public class ApiResponse<T> {
         this.data = data;
     }
 
-    // 성공 (데이터 있음)
     public static <T> ApiResponse<T> success(T data) {
         return new ApiResponse<>("SUCCESS", null, data);
     }
 
-    // 성공 (데이터 없음 - 삭제 등)
     public static <T> ApiResponse<T> success() {
         return new ApiResponse<>("SUCCESS", null, null);
     }
 
-    // 실패
     public static <T> ApiResponse<T> error(String message) {
         return new ApiResponse<>("ERROR", message, null);
     }

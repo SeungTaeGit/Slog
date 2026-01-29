@@ -1,7 +1,6 @@
 package com.slog.blog_api.domain.post.dto;
 
 import com.slog.blog_api.domain.post.entity.Post;
-import com.slog.blog_api.domain.tag.entity.PostTag;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
