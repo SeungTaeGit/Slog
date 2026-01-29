@@ -14,7 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/admin") // 👈 관리자 전용 경로
+@RequestMapping("/api/v1/admin")
 @RequiredArgsConstructor
 public class AdminController {
 

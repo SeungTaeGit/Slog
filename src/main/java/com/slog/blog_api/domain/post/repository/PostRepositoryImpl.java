@@ -81,11 +81,11 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     public List<SidebarDto.CategoryCount> getCategoryCounts() {
         return queryFactory
                 .select(com.querydsl.core.types.Projections.constructor(SidebarDto.CategoryCount.class,
-                        category.name, post.count()))
+                        category.id, category.name, post.count()))
                 .from(post)
                 .join(post.category, category)
                 .where(post.status.eq(PostStatus.PUBLIC))
-                .groupBy(category.name)
+                .groupBy(category.id, category.name)
                 .fetch();
     }
 
@@ -93,11 +93,11 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     public List<SidebarDto.SeriesCount> getSeriesCounts() {
         return queryFactory
                 .select(com.querydsl.core.types.Projections.constructor(SidebarDto.SeriesCount.class,
-                        series.name, post.count()))
+                        series.id, series.name, post.count()))
                 .from(post)
                 .join(post.series, series)
                 .where(post.status.eq(PostStatus.PUBLIC))
-                .groupBy(series.name)
+                .groupBy(series.id, series.name)
                 .fetch();
     }
 

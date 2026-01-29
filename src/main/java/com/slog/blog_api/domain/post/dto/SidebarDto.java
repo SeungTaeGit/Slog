@@ -10,6 +10,7 @@ public class SidebarDto {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class CategoryCount {
+        private Long id;
         private String name;
         private Long count;
     }
@@ -18,6 +19,7 @@ public class SidebarDto {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class SeriesCount {
+        private Long id;
         private String name;
         private Long count;
     }
