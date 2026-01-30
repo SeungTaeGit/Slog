@@ -26,7 +26,7 @@ public class PostRequest {
         return Post.builder()
                 .title(this.title)
                 .content(this.content)
-                .status(this.status)
+//                .status(this.status)
                 .build();
     }
 }

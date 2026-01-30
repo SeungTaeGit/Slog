@@ -1,6 +1,7 @@
 package com.slog.blog_api.domain.post.dto;
 
 import com.slog.blog_api.domain.post.entity.Post;
+import com.slog.blog_api.domain.post.entity.PostStatus;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -17,12 +18,14 @@ public class PostResponse {
     private final String categoryName;
     private final List<String> tags;
     private final String seriesName;
+    private final PostStatus status;
 
     public PostResponse(Post post) {
         this.id = post.getId();
         this.title = post.getTitle();
         this.content = post.getContent();
         this.views = post.getViews();
+        this.status = post.getStatus();
         this.createdAt = post.getCreatedAt();
         this.categoryName = (post.getCategory() != null) ? post.getCategory().getName() : null;
         this.tags = post.getPostTags().stream()

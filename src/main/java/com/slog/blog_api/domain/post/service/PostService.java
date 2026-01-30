@@ -44,7 +44,7 @@ public class PostService {
                 .thumbnailUrl("https://image.com/default.png")
                 .category(category)
                 .series(series)
-                .status(PostStatus.PUBLIC)
+//                .status(PostStatus.PUBLIC)
                 .build();
 
         if (request.getTags() != null) {

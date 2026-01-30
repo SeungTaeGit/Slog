@@ -48,12 +48,11 @@ public class Post extends BaseTimeEntity {
     private Series series;
 
     @Builder
-    public Post(String title, String content, String thumbnailUrl, Category category, PostStatus status, Series series) {
+    public Post(String title, String content, String thumbnailUrl, Category category, Series series) {
         this.title = title;
         this.content = content;
         this.thumbnailUrl = thumbnailUrl;
         this.category = category;
-        this.status = status;
         this.series = series;
     }
 

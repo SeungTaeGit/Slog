@@ -105,7 +105,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     public List<String> getPublicTagNames() {
         return queryFactory
                 .selectDistinct(tag.name)
-                .from(postTag) // PostTag 테이블 기준
+                .from(postTag)
                 .join(postTag.tag, tag)
                 .join(postTag.post, post)
                 .where(post.status.eq(PostStatus.PUBLIC))
