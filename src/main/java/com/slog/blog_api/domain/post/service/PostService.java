@@ -131,4 +131,12 @@ public class PostService {
                         .name(seriesName)
                         .build()));
     }
+
+    @Transactional
+    public void incrementViews(Long id) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("게시글이 없습니다."));
+
+        post.setViews(post.getViews() + 1);
+    }
 }

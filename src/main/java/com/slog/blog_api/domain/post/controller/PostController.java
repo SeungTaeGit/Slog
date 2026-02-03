@@ -7,6 +7,9 @@ import com.slog.blog_api.domain.post.dto.PostSearchCondition;
 import com.slog.blog_api.domain.post.entity.PostStatus;
 import com.slog.blog_api.domain.post.service.PostService;
 import com.slog.blog_api.global.common.ApiResponse;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,10 +31,41 @@ public class PostController {
         return ApiResponse.success(postId);
     }
 
-    @GetMapping("/{postId}")
-    public ApiResponse<PostResponse> get(@PathVariable Long postId) {
-        PostResponse response = postService.getPost(postId);
-        return ApiResponse.success(response);
+    @GetMapping("/{id}")
+    public ApiResponse<PostResponse> getPost(
+            @PathVariable Long id,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        Cookie[] cookies = request.getCookies();
+        boolean isAlreadyViewed = false;
+        String viewedPosts = "";
+
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("viewed_posts")) {
+                    viewedPosts = cookie.getValue();
+                    if (viewedPosts.contains("[" + id + "]")) {
+                        isAlreadyViewed = true;
+                    }
+                    break;
+                }
+            }
+        }
+
+        if (!isAlreadyViewed) {
+            postService.incrementViews(id);
+
+            viewedPosts += "[" + id + "]";
+            Cookie newCookie = new Cookie("viewed_posts", viewedPosts);
+            newCookie.setMaxAge(60 * 60 * 24);
+            newCookie.setPath("/");
+            newCookie.setHttpOnly(true);
+
+            response.addCookie(newCookie);
+        }
+
+        return ApiResponse.success(postService.getPost(id));
     }
 
     @GetMapping
