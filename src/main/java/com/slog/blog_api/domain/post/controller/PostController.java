@@ -41,6 +41,7 @@ public class PostController {
     ) {
         condition.setStatus(PostStatus.PUBLIC);
 
+        System.out.println("🔍 검색 조건 확인: " + condition);
         return ApiResponse.success(postService.getPostList(condition, pageable));
     }
 

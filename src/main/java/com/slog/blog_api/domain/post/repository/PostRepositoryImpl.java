@@ -137,9 +137,11 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     }
 
     private BooleanExpression keywordContains(String keyword) {
-        return StringUtils.hasText(keyword)
-                ? post.title.containsIgnoreCase(keyword).or(post.content.containsIgnoreCase(keyword))
-                : null;
+        if (!StringUtils.hasText(keyword)) {
+            return null;
+        }
+        return post.title.containsIgnoreCase(keyword)
+                .or(post.content.contains(keyword));
     }
 
     private BooleanExpression categoryEq(String categoryName) {

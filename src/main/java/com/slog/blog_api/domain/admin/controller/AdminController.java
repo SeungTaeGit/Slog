@@ -3,6 +3,8 @@ package com.slog.blog_api.domain.admin.controller;
 import com.slog.blog_api.domain.admin.dto.AdminDashboardDto;
 import com.slog.blog_api.domain.admin.dto.AdminRequestDto;
 import com.slog.blog_api.domain.admin.service.AdminService;
+import com.slog.blog_api.domain.log.entity.SystemLog;
+import com.slog.blog_api.domain.log.repository.SystemLogRepository;
 import com.slog.blog_api.domain.post.dto.PostResponse;
 import com.slog.blog_api.domain.post.dto.PostSearchCondition;
 import com.slog.blog_api.domain.post.entity.PostStatus;
@@ -11,6 +13,8 @@ import com.slog.blog_api.global.common.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,6 +24,7 @@ public class AdminController {
 
     private final AdminService adminService;
     private final PostService postService;
+    private final SystemLogRepository systemLogRepository;
 
     @GetMapping("/dashboard")
     public ApiResponse<AdminDashboardDto> getDashboard() {
@@ -83,5 +88,19 @@ public class AdminController {
     public ApiResponse<Void> hardDeletePost(@PathVariable Long id) {
         adminService.hardDeletePost(id);
         return ApiResponse.success();
+    }
+
+    @GetMapping("/logs")
+    public ApiResponse<Page<SystemLog>> getSystemLogs(
+            @RequestParam(required = false) String level,
+            @PageableDefault(size = 15, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        Page<SystemLog> logs;
+        if (level != null && !level.isEmpty()) {
+            logs = systemLogRepository.findByLevel(level, pageable);
+        } else {
+            logs = systemLogRepository.findAll(pageable);
+        }
+        return ApiResponse.success(logs);
     }
 }
